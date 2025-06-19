@@ -2,9 +2,11 @@
 
 PartnerSync is a private platform designed for couples to chat, plan dates and share memories across macOS and the web.
 
+
 Sprint 2 adds basic email authentication and a simple partner pairing flow using Firebase.
 
-## Project structure
+
+## Project structur
 
 - `macos-app` – SwiftUI project for macOS
 - `web-app` – Next.js application for the web/PWA
@@ -17,12 +19,16 @@ Sprint 2 adds basic email authentication and a simple partner pairing flow using
 ```bash
 cd web-app
 npm install
+
+npm install firebase
+
 npm run dev
 ```
 
 2. Open `macos-app/PartnerSync.xcodeproj` with Xcode to run the macOS application.
 
 Backend configuration is handled via Firebase (see the `firebase` directory and `.env.example`).
+
 After starting the web server you can visit `/login` to register or sign in with email and password. Use `/pair` to create an invite code or join your partner's code.
 
 ## Continuous Integration
