@@ -20,3 +20,15 @@ export async function joinPairing(code: string, userId: string) {
     await setDoc(ref, { ...(snap.data() as Pairing), partner: userId });
   }
 }
+
+const pairCodeKey = 'pairCode';
+
+export function setPairCode(code: string) {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(pairCodeKey, code);
+  }
+}
+
+export function getPairCode(): string | null {
+  return typeof window !== 'undefined' ? localStorage.getItem(pairCodeKey) : null;
+}
