@@ -18,12 +18,7 @@ struct ContentView: View {
             } else if !paired {
                 PairView { paired = true }
             } else {
-                VStack {
-                    Image(systemName: "heart")
-                        .imageScale(.large)
-                        .foregroundStyle(.tint)
-                    Text("Welcome, to a whole new Experience")
-                }
+                ChatView()
             }
         }
         .frame(minWidth: 300, minHeight: 200)

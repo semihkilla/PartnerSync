@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { createPairing, joinPairing } from '../../lib/pair';
+import { createPairing, joinPairing, setPairCode } from '../../lib/pair';
 import { auth } from '../../lib/auth';
 
 function randomCode() {
@@ -14,14 +14,17 @@ export default function Pair() {
   const user = auth.currentUser;
 
   return (
-    <div className="flex flex-col gap-2 max-w-sm mx-auto p-4">
+    <div className="flex flex-col gap-3 max-w-sm mx-auto p-6 bg-white rounded shadow">
       <div>
         <button
-          className="border px-2 py-1"
+          className="btn"
           onClick={() => {
             const c = randomCode();
             setCode(c);
-            if (user) createPairing(c, user.uid);
+            if (user) {
+              createPairing(c, user.uid);
+              setPairCode(c);
+            }
           }}
         >
           Generate Code
@@ -29,18 +32,28 @@ export default function Pair() {
       </div>
       <div className="flex gap-2">
         <input
-          className="border px-2 py-1 flex-1"
+          className="input flex-1"
           placeholder="Enter code"
           value={code}
           onChange={(e) => setCode(e.target.value)}
         />
         <button
-          className="border px-2 py-1"
-          onClick={() => user && joinPairing(code, user.uid)}
+          className="btn"
+          onClick={() => {
+            if (user) {
+              joinPairing(code, user.uid);
+              setPairCode(code);
+            }
+          }}
         >
           Join
         </button>
       </div>
+      {code && (
+        <a href="/chat" className="underline text-sm text-pink-700">
+          Go to Chat
+        </a>
+      )}
     </div>
   );
 }
