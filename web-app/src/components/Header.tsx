@@ -2,19 +2,11 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { auth, onAuthChange, logOut } from '../lib/auth';
-import { updatePresence } from '../lib/user';
 
 export default function Header() {
   const [user, setUser] = useState(auth.currentUser);
 
-  useEffect(
-    () =>
-      onAuthChange((u) => {
-        setUser(u);
-        if (u) updatePresence(u.uid);
-      }),
-    [],
-  );
+  useEffect(() => onAuthChange((u) => setUser(u)), []);
 
   return (
     <header className="fixed top-0 left-0 w-full bg-pink-400 text-white px-6 py-4 flex justify-between items-center shadow-lg z-10">

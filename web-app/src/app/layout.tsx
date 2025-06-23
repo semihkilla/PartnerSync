@@ -1,8 +1,10 @@
 import dynamic from "next/dynamic";
+import PresenceWatcher from "../components/PresenceWatcher";
 
 // Dynamically import the header so this file remains a server component and
 // metadata can be exported without the `use client` directive.
 const Header = dynamic(() => import("../components/Header"));
+        <PresenceWatcher />
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
