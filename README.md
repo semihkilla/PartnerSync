@@ -2,8 +2,9 @@
 
 PartnerSync is a private platform designed for couples to chat, plan dates and share memories across macOS and the web.
 
-
 Sprint 2 adds basic email authentication and a simple partner pairing flow using Firebase.
+Sprint 3 introduces a minimal chat experience with realtime messaging via Firestore.
+Sprint 4 adds user profiles, separate login/signup pages and a more colorful UI.
 
 
 ## Project structur

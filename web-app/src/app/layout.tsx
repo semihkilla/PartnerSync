@@ -1,6 +1,11 @@
+"use client";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Header from "../components/Header";
+import { useEffect } from "react";
+import { onAuthChange } from "../lib/auth";
+import { updatePresence } from "../lib/user";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,12 +27,14 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  useEffect(() => onAuthChange((u) => u && updatePresence(u.uid)), []);
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-pink-50 text-gray-800`}
       >
-        {children}
+        <Header />
+        <main className="max-w-lg mx-auto p-4">{children}</main>
       </body>
     </html>
   );

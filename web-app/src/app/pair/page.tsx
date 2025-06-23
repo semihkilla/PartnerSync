@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { createPairing, joinPairing } from '../../lib/pair';
+import { createPairing, joinPairing, setPairCode, getPairForUser } from '../../lib/pair';
 import { auth } from '../../lib/auth';
 
 function randomCode() {
@@ -10,18 +10,27 @@ function randomCode() {
 
 export default function Pair() {
   const [code, setCode] = useState('');
+  const [error, setError] = useState('');
 
   const user = auth.currentUser;
 
   return (
-    <div className="flex flex-col gap-2 max-w-sm mx-auto p-4">
+    <div className="flex flex-col gap-3 max-w-sm mx-auto p-6 bg-white rounded shadow mt-8">
       <div>
         <button
-          className="border px-2 py-1"
-          onClick={() => {
+          className="btn"
+          onClick={async () => {
+            if (!user) return;
+            const existing = await getPairForUser(user.uid);
+            if (existing) {
+              setError('Already paired');
+              return;
+            }
             const c = randomCode();
             setCode(c);
-            if (user) createPairing(c, user.uid);
+            await createPairing(c, user.uid);
+            setPairCode(c);
+            setError('');
           }}
         >
           Generate Code
@@ -29,18 +38,34 @@ export default function Pair() {
       </div>
       <div className="flex gap-2">
         <input
-          className="border px-2 py-1 flex-1"
+          className="input flex-1"
           placeholder="Enter code"
           value={code}
           onChange={(e) => setCode(e.target.value)}
         />
         <button
-          className="border px-2 py-1"
-          onClick={() => user && joinPairing(code, user.uid)}
+          className="btn"
+          onClick={async () => {
+            if (!user) return;
+            const existing = await getPairForUser(user.uid);
+            if (existing) {
+              setError('Already paired');
+              return;
+            }
+            await joinPairing(code, user.uid);
+            setPairCode(code);
+            setError('');
+          }}
         >
           Join
         </button>
       </div>
+      {error && <p className="error">{error}</p>}
+      {code && !error && (
+        <a href="/chat" className="underline text-sm text-pink-700">
+          Go to Chat
+        </a>
+      )}
     </div>
   );
 }
