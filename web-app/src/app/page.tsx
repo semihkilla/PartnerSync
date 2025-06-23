@@ -9,10 +9,13 @@ export default function Home() {
   useEffect(() => onAuthChange(setUser), []);
 
   return (
-    <div className="text-center mt-16 space-y-4">
-      <h1 className="text-3xl font-bold">Welcome to PartnerSync</h1>
+    <div className="card text-center space-y-6">
+      <div className="text-6xl">💖</div>
+      <h1 className="text-4xl sm:text-5xl font-extrabold text-white drop-shadow-xl">
+        Welcome to PartnerSync
+      </h1>
       {!user ? (
-        <div className="flex justify-center gap-4">
+        <div className="flex justify-center gap-4 mt-6">
           <Link href="/login" className="btn">
             Sign In
           </Link>
@@ -22,8 +25,7 @@ export default function Home() {
         </div>
       ) : (
         <div className="space-y-2">
-          <p className="text-lg">You are logged in.</p>
-          <div className="flex justify-center gap-4">
+          <div className="flex justify-center gap-4 mt-6">
             <Link href="/pair" className="btn">
               Pair with Partner
             </Link>
@@ -33,6 +35,7 @@ export default function Home() {
           </div>
         </div>
       )}
+      <p className="text-white/80 text-lg">Private space for two hearts</p>
     </div>
   );
 }

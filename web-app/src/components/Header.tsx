@@ -17,19 +17,32 @@ export default function Header() {
   );
 
   return (
-    <header className="bg-gradient-to-r from-pink-300 to-pink-400 text-pink-900 px-4 py-3 flex justify-between items-center shadow-md">
-      <Link href="/" className="font-bold text-lg">
-        PartnerSync
+    <header className="fixed top-0 left-0 w-full bg-pink-400 text-white px-6 py-4 flex justify-between items-center shadow-lg z-10">
+      <Link href="/" className="font-extrabold text-xl hover:scale-105 transition-transform">
+        💖 PartnerSync
       </Link>
-      <nav className="flex gap-4 items-center text-sm">
-        {!user && <Link href="/login">Login</Link>}
+      <nav className="flex gap-6 items-center text-lg font-semibold">
+        {!user && (
+          <Link href="/login" className="hover:scale-105 transition-transform">
+            🔑 Login
+          </Link>
+        )}
         {user && (
           <>
-            <Link className="hover:underline" href="/pair">Pair</Link>
-            <Link className="hover:underline" href="/chat">Chat</Link>
-            <Link className="hover:underline" href="/profile">Profile</Link>
-            <button onClick={() => logOut()} className="underline">
-              Logout
+            <Link href="/pair" className="hover:scale-105 transition-transform">
+              👫 Pair
+            </Link>
+            <Link href="/chat" className="hover:scale-105 transition-transform">
+              💌 Chat
+            </Link>
+            <Link href="/profile" className="hover:scale-105 transition-transform">
+              ⚙️ Profile
+            </Link>
+            <button
+              onClick={() => logOut()}
+              className="hover:scale-105 transition-transform"
+            >
+              🔓 Logout
             </button>
           </>
         )}

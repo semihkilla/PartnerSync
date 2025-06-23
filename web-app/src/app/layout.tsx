@@ -26,10 +26,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-pink-50 text-gray-800`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gradient-to-br from-pink-200 via-pink-300 to-pink-500 text-gray-800 min-h-screen`}
       >
         <Header />
-        <main className="max-w-lg mx-auto p-4">{children}</main>
+        <main className="pt-24 flex min-h-screen justify-center items-center p-4">
+          {children}
+        </main>
+        <button className="fab" aria-label="Love">
+          💖
+        </button>
       </body>
     </html>
   );
