@@ -12,7 +12,7 @@ export default function Login() {
   const router = useRouter();
 
   return (
-    <div className="flex flex-col gap-3 max-w-sm mx-auto p-6 bg-white rounded shadow mt-8">
+    <div className="card flex flex-col gap-4">
       <input
         className="input"
         placeholder="Email or Username"

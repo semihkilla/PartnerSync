@@ -59,7 +59,7 @@ export default function Profile() {
   if (!profile) return <p className="text-center mt-8">Loading...</p>;
 
   return (
-    <div className="max-w-sm mx-auto p-6 bg-white rounded shadow mt-8 flex flex-col gap-3">
+    <div className="card flex flex-col gap-4">
       <input className="input" name="username" value={profile.username ?? ''} onChange={handleChange} placeholder="Username" />
       <input className="input" name="firstName" value={profile.firstName ?? ''} onChange={handleChange} placeholder="First name" />
       <input className="input" name="lastName" value={profile.lastName ?? ''} onChange={handleChange} placeholder="Last name" />
