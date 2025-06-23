@@ -1,0 +1,43 @@
+import { collection, doc, getDoc, getDocs, query, serverTimestamp, setDoc, updateDoc, where, Timestamp } from 'firebase/firestore';
+import { db } from './firebase';
+
+export interface UserProfile {
+  username: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  age?: number;
+  photoURL?: string;
+  pair?: string;
+  lastActive?: Timestamp;
+}
+
+const users = collection(db, 'users');
+
+export async function createUserProfile(id: string, profile: UserProfile) {
+  await setDoc(doc(users, id), profile);
+}
+
+export async function getUserByUsername(username: string) {
+  const q = query(users, where('username', '==', username));
+  const snap = await getDocs(q);
+  if (!snap.empty) return { id: snap.docs[0].id, ...(snap.docs[0].data() as UserProfile) };
+  return null;
+}
+
+export async function updatePresence(id: string) {
+  await updateDoc(doc(users, id), { lastActive: serverTimestamp() });
+}
+
+export async function getUserProfile(id: string) {
+  const snap = await getDoc(doc(users, id));
+  return snap.exists() ? (snap.data() as UserProfile) : null;
+}
+
+export async function updatePair(id: string, pair: string) {
+  await updateDoc(doc(users, id), { pair });
+}
+
+export async function updateProfile(id: string, data: Partial<UserProfile>) {
+  await updateDoc(doc(users, id), data);
+}

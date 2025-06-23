@@ -12,11 +12,14 @@ export default function Home() {
     <div className="text-center mt-16 space-y-4">
       <h1 className="text-3xl font-bold">Welcome to PartnerSync</h1>
       {!user ? (
-        <p>
+        <div className="flex justify-center gap-4">
           <Link href="/login" className="btn">
-            Login to start
+            Sign In
           </Link>
-        </p>
+          <Link href="/signup" className="btn">
+            Sign Up
+          </Link>
+        </div>
       ) : (
         <div className="space-y-2">
           <p className="text-lg">You are logged in.</p>

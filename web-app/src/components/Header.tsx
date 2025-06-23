@@ -9,7 +9,7 @@ export default function Header() {
   useEffect(() => onAuthChange(setUser), []);
 
   return (
-    <header className="bg-pink-200 text-pink-900 px-4 py-2 flex justify-between items-center shadow">
+    <header className="bg-gradient-to-r from-pink-300 to-pink-400 text-pink-900 px-4 py-3 flex justify-between items-center shadow-md">
       <Link href="/" className="font-bold text-lg">
         PartnerSync
       </Link>
@@ -17,8 +17,9 @@ export default function Header() {
         {!user && <Link href="/login">Login</Link>}
         {user && (
           <>
-            <Link href="/pair">Pair</Link>
-            <Link href="/chat">Chat</Link>
+            <Link className="hover:underline" href="/pair">Pair</Link>
+            <Link className="hover:underline" href="/chat">Chat</Link>
+            <Link className="hover:underline" href="/profile">Profile</Link>
             <button onClick={() => logOut()} className="underline">
               Logout
             </button>
