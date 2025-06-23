@@ -26,7 +26,12 @@ export async function getUserByUsername(username: string) {
 }
 
 export async function updatePresence(id: string) {
-  await updateDoc(doc(users, id), { lastActive: serverTimestamp() });
+  // ensure the user document exists before updating presence
+  await setDoc(
+    doc(users, id),
+    { lastActive: serverTimestamp() },
+    { merge: true },
+  );
 }
 
 export async function getUserProfile(id: string) {

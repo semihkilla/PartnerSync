@@ -41,7 +41,7 @@ export default function SignUp() {
         photoURL: cred.user.photoURL || undefined,
       };
       await createUserProfile(cred.user.uid, profile);
-      router.push('/pair');
+      router.push('/');
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);
       else setError('Failed to sign up');

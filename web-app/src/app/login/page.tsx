@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { signIn } from '../../lib/auth';
 import { getUserByUsername } from '../../lib/user';
 
@@ -8,6 +9,7 @@ export default function Login() {
   const [emailOrUser, setEmailOrUser] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const router = useRouter();
 
   return (
     <div className="flex flex-col gap-3 max-w-sm mx-auto p-6 bg-white rounded shadow mt-8">
@@ -37,6 +39,7 @@ export default function Login() {
               email = u.email;
             }
             await signIn(email, password);
+            router.push('/');
           } catch (err: unknown) {
             if (err instanceof Error) setError(err.message);
             else setError('Failed to sign in');
