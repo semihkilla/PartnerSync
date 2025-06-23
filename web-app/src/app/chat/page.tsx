@@ -47,8 +47,16 @@ export default function Chat() {
       <div className="flex-1 overflow-y-auto mb-2">
         {messages.map((m) => (
           <div key={m.id} className="my-1">
-            <span className="text-xs text-gray-500 mr-1">{m.sender}:</span>
+            <span className="text-xs text-gray-500 mr-1">
+              {m.senderName ?? m.sender}:
+            </span>
             {m.text}
+            <span className="text-[10px] text-gray-400 ml-1">
+              {m.createdAt?.toDate().toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            </span>
           </div>
         ))}
       </div>

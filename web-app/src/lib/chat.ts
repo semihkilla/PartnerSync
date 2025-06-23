@@ -2,21 +2,26 @@ import { addDoc, collection, onSnapshot, orderBy, query, serverTimestamp, Timest
 import { db } from './firebase';
 import { auth } from './auth';
 import { getPairCode } from './pair';
+import { getUserProfile } from './user';
 
 export interface Message {
   id?: string;
   text: string;
   sender: string;
+  senderName?: string;
   createdAt: Timestamp;
 }
 
-export function sendMessage(text: string) {
+export async function sendMessage(text: string) {
   const pair = getPairCode();
   if (!pair) return;
   const ref = collection(db, 'pairings', pair, 'messages');
+  const sender = auth.currentUser?.uid || 'anonymous';
+  const profile = auth.currentUser ? await getUserProfile(auth.currentUser.uid) : null;
   return addDoc(ref, {
     text,
-    sender: auth.currentUser?.uid || 'anonymous',
+    sender,
+    senderName: profile?.username || 'anonymous',
     createdAt: serverTimestamp(),
   });
 }

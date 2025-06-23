@@ -1,4 +1,4 @@
-import { collection, doc, getDoc, getDocs, query, setDoc, where } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, deleteDoc, query, setDoc, where } from 'firebase/firestore';
 import { db } from './firebase';
 import { updatePair } from './user';
 
@@ -45,12 +45,26 @@ export async function getPartnerId(code: string, userId: string) {
   return null;
 }
 
+export async function deletePairing(code: string) {
+  const ref = doc(pairings, code);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return;
+  const data = snap.data() as Pairing;
+  if (data.creator) await updatePair(data.creator, null);
+  if (data.partner) await updatePair(data.partner, null);
+  await deleteDoc(ref);
+}
+
 const pairCodeKey = 'pairCode';
 
 export function setPairCode(code: string) {
   if (typeof window !== 'undefined') {
     localStorage.setItem(pairCodeKey, code);
   }
+}
+
+export function clearPairCode() {
+  if (typeof window !== 'undefined') localStorage.removeItem(pairCodeKey);
 }
 
 export function getPairCode(): string | null {

@@ -39,8 +39,8 @@ export async function getUserProfile(id: string) {
   return snap.exists() ? (snap.data() as UserProfile) : null;
 }
 
-export async function updatePair(id: string, pair: string) {
-  await updateDoc(doc(users, id), { pair });
+export async function updatePair(id: string, pair: string | null) {
+  await updateDoc(doc(users, id), { pair: pair ?? null });
 }
 
 export async function updateProfile(id: string, data: Partial<UserProfile>) {
