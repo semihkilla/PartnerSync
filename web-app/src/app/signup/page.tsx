@@ -60,10 +60,10 @@ export default function SignUp() {
         username: form.username,
         email: form.email,
         pairCode,
-        firstName: form.firstName || undefined,
-        lastName: form.lastName || undefined,
-        birthday: form.birthday || undefined,
         photoURL: cred.user.photoURL ?? '',
+        ...(form.firstName ? { firstName: form.firstName } : {}),
+        ...(form.lastName ? { lastName: form.lastName } : {}),
+        ...(form.birthday ? { birthday: form.birthday } : {}),
       };
       await createUserProfile(cred.user.uid, profile);
       alert('Erfolgreich registriert. Dein Code: ' + pairCode);

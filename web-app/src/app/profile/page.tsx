@@ -51,6 +51,7 @@ export default function Profile() {
     try {
       if (auth.currentUser && profile) {
         await updateProfile(auth.currentUser.uid, profile);
+        alert('Erfolgreich gespeichert');
       }
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);

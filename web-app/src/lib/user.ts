@@ -17,8 +17,14 @@ export interface UserProfile {
 
 const users = collection(db, 'users');
 
+function removeUndefined<T extends Record<string, unknown>>(obj: T): T {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([, v]) => v !== undefined && v !== null),
+  ) as T;
+}
+
 export async function createUserProfile(id: string, profile: UserProfile) {
-  await setDoc(doc(users, id), profile);
+  await setDoc(doc(users, id), removeUndefined(profile));
 }
 
 export async function getUserByUsername(username: string) {
@@ -54,5 +60,5 @@ export async function updatePair(id: string, pair: string | null) {
 }
 
 export async function updateProfile(id: string, data: Partial<UserProfile>) {
-  await updateDoc(doc(users, id), data);
+  await updateDoc(doc(users, id), removeUndefined(data));
 }
