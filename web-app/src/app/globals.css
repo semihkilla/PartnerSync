@@ -1,28 +1,7 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffeef2;
-  --foreground: #3b3b3b;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #1a1a1a;
-    --foreground: #f2f2f2;
-  }
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans);
+  @apply bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-white font-sans;
 }
 
 @layer components {
@@ -30,13 +9,11 @@ body {
     @apply bg-pink-500 text-white font-semibold px-4 py-2 rounded-xl shadow hover:bg-pink-600 transition-colors;
   }
   .input {
-    @apply border rounded-xl px-4 py-2 bg-white shadow focus:outline-none focus:ring-2 focus:ring-pink-300;
-    &::placeholder {
-      @apply text-gray-400;
-    }
+    @apply rounded-xl px-4 py-2 bg-pink-100 dark:bg-pink-900/30 text-black dark:text-white shadow focus:outline-none focus:ring-2 focus:ring-pink-400;
+    &::placeholder { @apply text-gray-400; }
   }
   .card {
-    @apply bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-xl max-w-md w-full;
+    @apply bg-gray-200/90 dark:bg-gray-800/90 backdrop-blur-sm p-8 rounded-2xl shadow-xl max-w-md w-full;
   }
   .fab {
     @apply fixed bottom-6 right-6 w-16 h-16 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 shadow-xl flex items-center justify-center text-3xl text-white border-4 border-white/30 hover:scale-105 transition-transform;

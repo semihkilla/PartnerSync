@@ -64,6 +64,15 @@ export default function Profile() {
       <input className="input" name="firstName" value={profile.firstName ?? ''} onChange={handleChange} placeholder="First name" />
       <input className="input" name="lastName" value={profile.lastName ?? ''} onChange={handleChange} placeholder="Last name" />
       <input className="input" name="age" type="number" value={profile.age ?? ''} onChange={handleChange} placeholder="Age" />
+      <div className="flex items-center gap-2 text-sm">
+        <span>Your Code: {profile.pairCode}</span>
+        <button
+          className="underline"
+          onClick={() => navigator.clipboard.writeText(profile.pairCode)}
+        >
+          Copy
+        </button>
+      </div>
       {profile.pair && (
         <div className="text-sm flex items-center gap-2">
           <span>Paired with {partnerName || '...'}</span>

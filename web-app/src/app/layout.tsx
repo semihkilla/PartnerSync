@@ -27,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gradient-to-br from-pink-200 via-pink-300 to-pink-500 text-gray-800 min-h-screen`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-white min-h-screen`}
       >
         <Header />
         <PresenceWatcher /> {/* <- Hier einfügen */}

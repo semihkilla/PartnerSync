@@ -32,15 +32,18 @@ export default function SignUp() {
     }
     try {
       const cred = await signUp(form.email, form.password);
+      const pairCode = 'PS-' + crypto.randomUUID().split('-')[0];
       const profile: UserProfile = {
         username: form.username,
         email: form.email,
+        pairCode,
         firstName: form.firstName || undefined,
         lastName: form.lastName || undefined,
         age: form.age ? Number(form.age) : undefined,
         photoURL: cred.user.photoURL || undefined,
       };
       await createUserProfile(cred.user.uid, profile);
+      alert('Your pair code: ' + pairCode);
       router.push('/');
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);

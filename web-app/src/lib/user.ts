@@ -4,6 +4,8 @@ import { db } from './firebase';
 export interface UserProfile {
   username: string;
   email: string;
+  /** permanent pairing code shown to other users */
+  pairCode: string;
   firstName?: string;
   lastName?: string;
   age?: number;
@@ -20,6 +22,13 @@ export async function createUserProfile(id: string, profile: UserProfile) {
 
 export async function getUserByUsername(username: string) {
   const q = query(users, where('username', '==', username));
+  const snap = await getDocs(q);
+  if (!snap.empty) return { id: snap.docs[0].id, ...(snap.docs[0].data() as UserProfile) };
+  return null;
+}
+
+export async function getUserByPairCode(code: string) {
+  const q = query(users, where('pairCode', '==', code));
   const snap = await getDocs(q);
   if (!snap.empty) return { id: snap.docs[0].id, ...(snap.docs[0].data() as UserProfile) };
   return null;
