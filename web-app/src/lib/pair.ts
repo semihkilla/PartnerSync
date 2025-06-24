@@ -63,6 +63,14 @@ export async function getPartnerId(pairId: string, userId: string) {
   return other || null;
 }
 
+export async function deletePairing(pairId: string) {
+  const snap = await getDoc(doc(pairings, pairId));
+  if (!snap.exists()) return;
+  const data = snap.data() as Pairing;
+  await Promise.all(data.users.map(uid => updatePair(uid, null)));
+  await deleteDoc(doc(pairings, pairId));
+}
+
 const pairKey = 'pairId';
 export function setPairCode(id: string) {
   if (typeof window !== 'undefined') localStorage.setItem(pairKey, id);
