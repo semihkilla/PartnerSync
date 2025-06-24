@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { createPairing, joinPairing, setPairCode } from '../../lib/pair';
+import { createPairing, joinPairing, setPairCode, getPairForUser } from '../../lib/pair';
 import { auth } from '../../lib/auth';
 
 function randomCode() {
@@ -10,21 +10,27 @@ function randomCode() {
 
 export default function Pair() {
   const [code, setCode] = useState('');
+  const [error, setError] = useState('');
 
   const user = auth.currentUser;
 
   return (
-    <div className="flex flex-col gap-3 max-w-sm mx-auto p-6 bg-white rounded shadow">
+    <div className="card flex flex-col gap-4">
       <div>
         <button
           className="btn"
-          onClick={() => {
+          onClick={async () => {
+            if (!user) return;
+            const existing = await getPairForUser(user.uid);
+            if (existing) {
+              setError('Already paired');
+              return;
+            }
             const c = randomCode();
             setCode(c);
-            if (user) {
-              createPairing(c, user.uid);
-              setPairCode(c);
-            }
+            await createPairing(c, user.uid);
+            setPairCode(c);
+            setError('');
           }}
         >
           Generate Code
@@ -39,17 +45,23 @@ export default function Pair() {
         />
         <button
           className="btn"
-          onClick={() => {
-            if (user) {
-              joinPairing(code, user.uid);
-              setPairCode(code);
+          onClick={async () => {
+            if (!user) return;
+            const existing = await getPairForUser(user.uid);
+            if (existing) {
+              setError('Already paired');
+              return;
             }
+            await joinPairing(code, user.uid);
+            setPairCode(code);
+            setError('');
           }}
         >
           Join
         </button>
       </div>
-      {code && (
+      {error && <p className="error">{error}</p>}
+      {code && !error && (
         <a href="/chat" className="underline text-sm text-pink-700">
           Go to Chat
         </a>

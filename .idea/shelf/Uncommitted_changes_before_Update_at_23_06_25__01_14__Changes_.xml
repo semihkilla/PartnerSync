@@ -1,0 +1,12 @@
+<changelist name="Uncommitted_changes_before_Update_at_23_06_25,_01_14_[Changes]" date="1750634093585" recycled="false" toDelete="true">
+  <option name="PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_06_25,_01_14_[Changes]/shelved.patch" />
+  <option name="DESCRIPTION" value="Uncommitted changes before Update at 23.06.25, 01:14 [Changes]" />
+  <binary>
+    <option name="BEFORE_PATH" value="macos-app/PartnerSync/PartnerSync.xcodeproj/project.xcworkspace/xcuserdata/semiherden.xcuserdatad/UserInterfaceState.xcuserstate" />
+    <option name="AFTER_PATH" value="macos-app/PartnerSync/PartnerSync.xcodeproj/project.xcworkspace/xcuserdata/semiherden.xcuserdatad/UserInterfaceState.xcuserstate" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_06_25,_01_14_[Changes]/UserInterfaceState.xcuserstate" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="web-app/.env.example" />
+  </binary>
+</changelist>

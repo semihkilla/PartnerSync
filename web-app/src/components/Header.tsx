@@ -6,21 +6,35 @@ import { auth, onAuthChange, logOut } from '../lib/auth';
 export default function Header() {
   const [user, setUser] = useState(auth.currentUser);
 
-  useEffect(() => onAuthChange(setUser), []);
+  useEffect(() => onAuthChange((u) => setUser(u)), []);
 
   return (
-    <header className="bg-pink-200 text-pink-900 px-4 py-2 flex justify-between items-center shadow">
-      <Link href="/" className="font-bold text-lg">
-        PartnerSync
+    <header className="fixed top-0 left-0 w-full bg-pink-400 text-white px-6 py-4 flex justify-between items-center shadow-lg z-10">
+      <Link href="/" className="font-extrabold text-xl hover:scale-105 transition-transform">
+        💖 PartnerSync
       </Link>
-      <nav className="flex gap-4 items-center text-sm">
-        {!user && <Link href="/login">Login</Link>}
+      <nav className="flex gap-6 items-center text-lg font-semibold">
+        {!user && (
+          <Link href="/login" className="hover:scale-105 transition-transform">
+            🔑 Login
+          </Link>
+        )}
         {user && (
           <>
-            <Link href="/pair">Pair</Link>
-            <Link href="/chat">Chat</Link>
-            <button onClick={() => logOut()} className="underline">
-              Logout
+            <Link href="/pair" className="hover:scale-105 transition-transform">
+              👫 Pair
+            </Link>
+            <Link href="/chat" className="hover:scale-105 transition-transform">
+              💌 Chat
+            </Link>
+            <Link href="/profile" className="hover:scale-105 transition-transform">
+              ⚙️ Profile
+            </Link>
+            <button
+              onClick={() => logOut()}
+              className="hover:scale-105 transition-transform"
+            >
+              🔓 Logout
             </button>
           </>
         )}
