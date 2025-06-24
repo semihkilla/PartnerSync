@@ -8,6 +8,7 @@ import { getUserProfile } from '../../lib/user';
 export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState('');
+  const [query, setQuery] = useState('');
   const [partnerName, setPartnerName] = useState<string | null>(null);
   const [bg, setBg] = useState<string>(() => localStorage.getItem('chatBg') || '#ffffff');
   const pairCode = getPairCode();
@@ -47,13 +48,24 @@ export default function Chat() {
       className="card flex flex-col h-[60vh] w-full max-w-lg"
       style={{ background: bg }}
     >
+      <div className="flex justify-between items-center mb-2">
+        {partnerName && <span className="font-semibold">{partnerName}</span>}
+        <input
+          className="input h-8 ml-auto"
+          placeholder="Search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      </div>
       <div className="flex-1 overflow-y-auto space-y-2 mb-2 bg-white/80 rounded-xl p-2">
-        {messages.map((m) => {
-          const mine = m.sender === auth.currentUser?.uid;
-          return (
+        {messages
+          .filter((m) => m.text.toLowerCase().includes(query.toLowerCase()))
+          .map((m) => {
+            const mine = m.sender === auth.currentUser?.uid;
+            return (
             <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
               <div
-                className={`px-3 py-2 rounded-xl shadow max-w-xs ${mine ? 'bg-pink-300' : 'bg-white'}`}
+                className={`px-3 py-2 rounded-xl shadow max-w-xs ${mine ? 'bg-pink-300 dark:bg-pink-700 text-black dark:text-white' : 'bg-white dark:bg-gray-700'}`}
               >
                 <div className="text-xs text-gray-600 mb-1">
                   {m.senderName ?? m.sender}

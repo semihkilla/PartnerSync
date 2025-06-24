@@ -8,7 +8,8 @@ export interface UserProfile {
   pairCode: string;
   firstName?: string;
   lastName?: string;
-  age?: number;
+  /** birthday in ISO format YYYY-MM-DD */
+  birthday?: string;
   photoURL?: string;
   pair?: string;
   lastActive?: Timestamp;
