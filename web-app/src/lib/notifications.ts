@@ -1,4 +1,4 @@
-import { addDoc, collection, onSnapshot, orderBy, query, serverTimestamp, updateDoc, doc } from 'firebase/firestore';
+import { addDoc, collection, onSnapshot, orderBy, query, serverTimestamp, updateDoc, doc, deleteDoc } from 'firebase/firestore';
 import { db } from './firebase';
 
 export interface NotificationDoc {
@@ -30,4 +30,9 @@ export async function markNotificationRead(id: string) {
 
 export async function createNotification(data: Omit<NotificationDoc, 'id' | 'read' | 'createdAt'>) {
   await addDoc(notifications, { ...data, read: false, createdAt: serverTimestamp() });
+}
+
+export async function deleteNotification(id: string) {
+  await updateDoc(doc(notifications, id), { read: true });
+  await deleteDoc(doc(notifications, id));
 }

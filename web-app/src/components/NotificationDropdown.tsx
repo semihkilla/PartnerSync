@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { auth } from '../lib/auth';
 import { acceptPairRequest, declinePairRequest, subscribeToRequests, setPairCode, PairRequest } from '../lib/pair';
-import { NotificationDoc, subscribeToNotifications, markNotificationRead } from '../lib/notifications';
+import { NotificationDoc, subscribeToNotifications, markNotificationRead, deleteNotification } from '../lib/notifications';
 
 export default function NotificationDropdown() {
   const [open, setOpen] = useState(false);
@@ -51,20 +51,28 @@ export default function NotificationDropdown() {
           {notifications.map(n => (
             <div key={n.id} className="text-sm flex justify-between items-center">
               <span>{renderNotification(n)}</span>
-              {!n.read && (
+              <div className="flex gap-1">
+                {!n.read && (
+                  <button
+                    className="underline text-xs"
+                    onClick={() => {
+                      if (n.type === 'pairAccepted' && n.from && auth.currentUser) {
+                        const id = [auth.currentUser.uid, n.from].sort().join('_');
+                        setPairCode(id);
+                      }
+                      markNotificationRead(n.id!);
+                    }}
+                  >
+                    Mark
+                  </button>
+                )}
                 <button
-                  className="underline text-xs"
-                  onClick={() => {
-                    if (n.type === 'pairAccepted' && n.from && auth.currentUser) {
-                      const id = [auth.currentUser.uid, n.from].sort().join('_');
-                      setPairCode(id);
-                    }
-                    markNotificationRead(n.id!);
-                  }}
+                  className="underline text-xs text-red-600"
+                  onClick={() => n.id && deleteNotification(n.id)}
                 >
-                  Mark
+                  ✕
                 </button>
-              )}
+              </div>
             </div>
           ))}
           {requests.length===0 && notifications.length===0 && <p className="text-center text-sm">No notifications</p>}

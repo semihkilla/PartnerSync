@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { signUp } from '../../lib/auth';
-import { createUserProfile, UserProfile } from '../../lib/user';
+import { createUserProfile, UserProfile, getUserByPairCode } from '../../lib/user';
 import { useRouter } from 'next/navigation';
 import { auth } from '../../lib/auth';
 
@@ -18,6 +18,14 @@ export default function SignUp() {
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+
+  const generateCode = async () => {
+    let code = '';
+    do {
+      code = Math.random().toString(36).substring(2, 8).toUpperCase();
+    } while (await getUserByPairCode(code));
+    return code;
+  };
 
   useEffect(() => {
     if (auth.currentUser) router.replace('/');
@@ -37,13 +45,17 @@ export default function SignUp() {
       setError('Username and password required');
       return;
     }
+    if (form.password.length < 8) {
+      setError('Password must be at least 8 characters');
+      return;
+    }
     if (form.password !== form.password2) {
       setError('Passwords do not match');
       return;
     }
     try {
       const cred = await signUp(form.email, form.password);
-      const pairCode = 'PS-' + crypto.randomUUID().split('-')[0];
+      const pairCode = 'PS-' + (await generateCode());
       const profile: UserProfile = {
         username: form.username,
         email: form.email,
@@ -51,7 +63,7 @@ export default function SignUp() {
         firstName: form.firstName || undefined,
         lastName: form.lastName || undefined,
         birthday: form.birthday || undefined,
-        photoURL: cred.user.photoURL || undefined,
+        photoURL: cred.user.photoURL ?? '',
       };
       await createUserProfile(cred.user.uid, profile);
       alert('Erfolgreich registriert. Dein Code: ' + pairCode);
