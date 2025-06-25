@@ -1,9 +1,9 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { signUp } from '../../lib/auth';
+import { signUp, auth } from '../../lib/auth';
 import { createUserProfile, UserProfile, getUserByPairCode } from '../../lib/user';
 import { useRouter } from 'next/navigation';
-import { auth } from '../../lib/auth';
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 
 export default function SignUp() {
   const [form, setForm] = useState({
@@ -107,6 +107,21 @@ export default function SignUp() {
       <input className="input" name="lastName" placeholder="Last name" value={form.lastName} onChange={handleChange} />
       <input className="input" name="birthday" type="date" placeholder="Birthday" value={form.birthday} onChange={handleChange} />
       {error && <p className="error">{error}</p>}
+      <button
+        className="btn bg-white text-pink-500 flex items-center gap-2 border border-pink-400 shadow"
+        onClick={async () => {
+          try {
+            const provider = new GoogleAuthProvider();
+            await signInWithPopup(auth, provider);
+            router.push('/');
+          } catch (err) {
+            setError((err as Error).message);
+          }
+        }}
+      >
+        <img src="/google-logo.svg" className="w-5 h-5" alt="Google" />
+        Sign up with Google
+      </button>
       <button className="btn" onClick={handleSubmit}>Sign Up</button>
       <a href="/login" className="underline text-sm text-center">Already have an account?</a>
     </div>

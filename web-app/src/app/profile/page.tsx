@@ -14,6 +14,7 @@ import {
 import { deleteUser } from 'firebase/auth';
 import { doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
+import AnniversaryDisplay from '../../components/AnniversaryDisplay';
 
 export default function Profile() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -81,6 +82,8 @@ export default function Profile() {
       {profile.birthday && (
         <span className="text-sm">Age: {calcAge(profile.birthday)}</span>
       )}
+      <input className="input" name="anniversary" type="date" value={profile.anniversary ?? ''} onChange={handleChange} placeholder="Anniversary" />
+      {profile.anniversary && <AnniversaryDisplay date={profile.anniversary} />}
       <div className="flex items-center gap-2 text-sm">
         <span>Your Code: {profile.pairCode}</span>
         <button

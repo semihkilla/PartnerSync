@@ -10,6 +10,8 @@ export interface UserProfile {
   lastName?: string;
   /** birthday in ISO format YYYY-MM-DD */
   birthday?: string;
+  /** date when the couple started dating */
+  anniversary?: string;
   photoURL?: string;
   pair?: string;
   lastActive?: Timestamp;

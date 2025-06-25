@@ -3,11 +3,13 @@ import { useEffect, useState } from 'react';
 import { auth } from '../lib/auth';
 import { acceptPairRequest, declinePairRequest, subscribeToRequests, setPairCode, PairRequest } from '../lib/pair';
 import { NotificationDoc, subscribeToNotifications, markNotificationRead, deleteNotification } from '../lib/notifications';
+import { getUserProfile } from '../lib/user';
 
 export default function NotificationDropdown() {
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationDoc[]>([]);
   const [requests, setRequests] = useState<(PairRequest & {id:string})[]>([]);
+  const [usernames, setUsernames] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const u = auth.currentUser;
@@ -19,6 +21,19 @@ export default function NotificationDropdown() {
       unsubR();
     };
   }, []);
+
+  useEffect(() => {
+    async function fetchNames() {
+      const missing = requests.filter(r => !usernames[r.requester]);
+      const updates: Record<string, string> = {};
+      for (const r of missing) {
+        const p = await getUserProfile(r.requester);
+        if (p?.username) updates[r.requester] = p.username;
+      }
+      if (Object.keys(updates).length) setUsernames(u => ({ ...u, ...updates }));
+    }
+    fetchNames();
+  }, [requests, usernames]);
 
   const unread = notifications.filter(n => !n.read).length + requests.length;
 
@@ -43,7 +58,7 @@ export default function NotificationDropdown() {
         <div className="absolute right-0 mt-2 w-64 bg-gray-200 dark:bg-gray-800 rounded-xl shadow p-2 space-y-2 z-20">
           {requests.map(r => (
             <div key={r.id} className="text-sm flex items-center gap-2">
-              <span className="flex-1">Pair request from {r.requester}</span>
+              <span className="flex-1">Pair request from {usernames[r.requester] ?? r.requester}</span>
               <button className="btn px-2 py-1 text-xs" onClick={() => acceptPairRequest(r.id, r.requester)}>✓</button>
               <button className="btn px-2 py-1 text-xs" onClick={() => declinePairRequest(r.id, r.requester)}>✕</button>
             </div>

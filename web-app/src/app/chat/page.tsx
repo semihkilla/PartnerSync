@@ -1,5 +1,6 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Message, sendMessage, subscribeToMessages } from '../../lib/chat';
 import { getPairCode, getPartnerId } from '../../lib/pair';
 import { auth } from '../../lib/auth';
@@ -10,8 +11,26 @@ export default function Chat() {
   const [text, setText] = useState('');
   const [query, setQuery] = useState('');
   const [partnerName, setPartnerName] = useState<string | null>(null);
-  const [bg, setBg] = useState<string>(() => localStorage.getItem('chatBg') || '#ffffff');
+  const [bg, setBg] = useState<string>('#ffffff');
+  const bottomRef = useRef<HTMLDivElement>(null);
   const pairCode = getPairCode();
+
+  const groupByDate = (list: Message[]) => {
+    const groups: Record<string, Message[]> = {};
+    for (const m of list) {
+      const day = m.createdAt?.toDate().toLocaleDateString() ?? 'unknown';
+      if (!groups[day]) groups[day] = [];
+      groups[day].push(m);
+    }
+    return groups;
+  };
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('chatBg');
+      if (saved) setBg(saved);
+    }
+  }, []);
 
   useEffect(() => {
     if (!pairCode) return;
@@ -20,6 +39,10 @@ export default function Chat() {
       if (typeof unsub === 'function') unsub();
     };
   }, [pairCode]);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   useEffect(() => {
     async function fetchPartner() {
@@ -57,30 +80,36 @@ export default function Chat() {
           onChange={(e) => setQuery(e.target.value)}
         />
       </div>
-      <div className="flex-1 overflow-y-auto space-y-2 mb-2 bg-white/80 rounded-xl p-2">
-        {messages
-          .filter((m) => m.text.toLowerCase().includes(query.toLowerCase()))
-          .map((m) => {
-            const mine = m.sender === auth.currentUser?.uid;
-            return (
-            <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
-              <div
-                className={`px-3 py-2 rounded-xl shadow max-w-xs ${mine ? 'bg-pink-300 dark:bg-pink-700 text-black dark:text-white' : 'bg-white dark:bg-gray-700'}`}
-              >
-                <div className="text-xs text-gray-600 mb-1">
-                  {m.senderName ?? m.sender}
-                </div>
-                <div>{m.text}</div>
-                <div className="text-[10px] text-gray-500 text-right mt-1">
-                  {m.createdAt?.toDate().toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </div>
-              </div>
-            </div>
-          );
-        })}
+      <div className="flex-1 overflow-y-auto space-y-4 mb-2 bg-white/80 dark:bg-gray-800/70 rounded-xl p-3">
+        {Object.entries(groupByDate(messages.filter(m => m.text.toLowerCase().includes(query.toLowerCase())))).map(([day, msgs]) => (
+          <div key={day}>
+            <div className="text-center my-2 text-xs text-gray-500">{day}</div>
+            <AnimatePresence>
+              {msgs.map(m => {
+                const mine = m.sender === auth.currentUser?.uid;
+                return (
+                  <motion.div
+                    key={m.id}
+                    initial={{ opacity: 0, x: mine ? 50 : -50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: mine ? 50 : -50 }}
+                    transition={{ duration: 0.3 }}
+                    className={`flex ${mine ? 'justify-end' : 'justify-start'} w-full`}
+                  >
+                    <div className={`px-4 py-2 rounded-2xl shadow max-w-xs break-words ${mine ? 'bg-gradient-to-br from-pink-400 to-pink-500 text-white rounded-br-3xl' : 'bg-white dark:bg-gray-700 text-black dark:text-white rounded-bl-3xl'}`}>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-bold text-xs">{m.senderName ?? m.sender}</span>
+                        <span className="text-[10px] text-gray-400">{m.createdAt?.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                      </div>
+                      <div>{m.text}</div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          </div>
+        ))}
+        <div ref={bottomRef} />
       </div>
       <div className="flex gap-2 mt-auto">
         <input
@@ -93,14 +122,22 @@ export default function Chat() {
           ➤
         </button>
       </div>
-      <div className="mt-2 flex items-center gap-2 text-sm">
-        <label>Background:</label>
+      <div className="mt-2 flex items-center gap-3 text-sm">
+        <label htmlFor="chat-bg-picker" className="font-semibold">Background:</label>
+        <div
+          className="w-7 h-7 rounded-full border-2 border-pink-400 shadow-lg transition-transform transform hover:scale-110 cursor-pointer"
+          style={{ background: bg }}
+          title="Current background"
+          onClick={() => document.getElementById('chat-bg-picker')?.click()}
+        />
         <input
+          id="chat-bg-picker"
           type="color"
+          className="hidden"
           value={bg}
           onChange={(e) => {
             setBg(e.target.value);
-            localStorage.setItem('chatBg', e.target.value);
+            if (typeof window !== 'undefined') localStorage.setItem('chatBg', e.target.value);
           }}
         />
         {partnerName && <span className="ml-auto">Chatting with {partnerName}</span>}
