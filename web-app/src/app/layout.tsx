@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "../components/Header";
 import PresenceWatcher from "../components/PresenceWatcher"; // <-- NEU
+import FloatingMenu from "../components/FloatingMenu";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,16 +28,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gradient-to-br from-pink-200 via-pink-300 to-pink-500 text-gray-800 min-h-screen`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-white min-h-screen`}
       >
         <Header />
         <PresenceWatcher /> {/* <- Hier einfügen */}
         <main className="pt-24 flex min-h-screen justify-center items-center p-4">
           {children}
         </main>
-        <button className="fab" aria-label="Love">
-          💖
-        </button>
+        <FloatingMenu />
       </body>
     </html>
   );

@@ -2,12 +2,14 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { signIn } from '../../lib/auth';
+import { signIn, auth } from '../../lib/auth';
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { getUserByUsername } from '../../lib/user';
 
 export default function Login() {
   const [emailOrUser, setEmailOrUser] = useState('');
   const [password, setPassword] = useState('');
+  const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
 
@@ -19,14 +21,38 @@ export default function Login() {
         value={emailOrUser}
         onChange={(e) => setEmailOrUser(e.target.value)}
       />
-      <input
-        className="input"
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
+      <div className="relative">
+        <input
+          className="input pr-10 w-full"
+          type={showPass ? 'text' : 'password'}
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button
+          type="button"
+          className="absolute right-2 top-2 text-xl"
+          onClick={() => setShowPass(!showPass)}
+        >
+          {showPass ? '🙈' : '👁️'}
+        </button>
+      </div>
       {error && <p className="error">{error}</p>}
+      <button
+        className="btn bg-white text-pink-500 flex items-center gap-2 border border-pink-400 shadow"
+        onClick={async () => {
+          try {
+            const provider = new GoogleAuthProvider();
+            await signInWithPopup(auth, provider);
+            router.push('/');
+          } catch (err) {
+            setError((err as Error).message);
+          }
+        }}
+      >
+        <img src="/google-logo.svg" className="w-5 h-5" alt="Google" />
+        Sign in with Google
+      </button>
       <button
         className="btn"
         onClick={async () => {

@@ -1,72 +1,83 @@
-import { collection, doc, getDoc, getDocs, deleteDoc, query, setDoc, where } from 'firebase/firestore';
+import { addDoc, collection, deleteDoc, doc, getDoc, onSnapshot, query, serverTimestamp, setDoc, where } from 'firebase/firestore';
+import { auth } from './auth';
 import { db } from './firebase';
-import { updatePair } from './user';
+import { getUserByPairCode, updatePair } from './user';
+
+export interface PairRequest {
+  requester: string;
+  target: string;
+  status: 'pending' | 'accepted' | 'declined';
+  createdAt: ReturnType<typeof serverTimestamp> | null;
+}
 
 export interface Pairing {
-  code: string;
-  creator: string;
-  partner?: string;
+  users: string[];
 }
 
 const pairings = collection(db, 'pairings');
+const requests = collection(db, 'pairRequests');
+const notifications = collection(db, 'notifications');
 
-export async function createPairing(code: string, userId: string) {
-  await setDoc(doc(pairings, code), { code, creator: userId } as Pairing);
-  await updatePair(userId, code);
+export async function sendPairRequest(code: string) {
+  const requester = auth.currentUser?.uid;
+  if (!requester) throw new Error('Not authenticated');
+  const targetUser = await getUserByPairCode(code);
+  if (!targetUser) throw new Error('User not found');
+  await addDoc(requests, { requester, target: targetUser.id, status: 'pending', createdAt: serverTimestamp() });
+  await addDoc(notifications, { userId: targetUser.id, type: 'pairRequest', from: requester, createdAt: serverTimestamp(), read: false });
 }
 
-export async function joinPairing(code: string, userId: string) {
-  const ref = doc(pairings, code);
-  const snap = await getDoc(ref);
-  if (snap.exists()) {
-    const data = snap.data() as Pairing;
-    if (data.partner) return;
-    await setDoc(ref, { ...data, partner: userId });
-    await updatePair(userId, code);
-  }
+export async function acceptPairRequest(requestId: string, requester: string) {
+  const user = auth.currentUser?.uid;
+  if (!user) return;
+  const id = [user, requester].sort().join('_');
+  await setDoc(doc(pairings, id), { users: [user, requester] } as Pairing);
+  await updatePair(user, id);
+  await updatePair(requester, id);
+  setPairCode(id);
+  await addDoc(notifications, { userId: requester, type: 'pairAccepted', from: user, createdAt: serverTimestamp(), read: false });
+  await deleteDoc(doc(requests, requestId));
 }
 
-export async function getPairForUser(userId: string) {
-  const q = query(pairings, where('creator', '==', userId));
-  let snap = await getDocs(q);
-  if (!snap.empty) return snap.docs[0].id;
-  const q2 = query(pairings, where('partner', '==', userId));
-  snap = await getDocs(q2);
-  if (!snap.empty) return snap.docs[0].id;
-  return null;
+export async function declinePairRequest(requestId: string, requester: string) {
+  const user = auth.currentUser?.uid;
+  if (!user) return;
+  await addDoc(notifications, { userId: requester, type: 'pairDeclined', from: user, createdAt: serverTimestamp(), read: false });
+  await deleteDoc(doc(requests, requestId));
 }
 
-export async function getPartnerId(code: string, userId: string) {
-  const snap = await getDoc(doc(pairings, code));
+export function subscribeToRequests(userId: string, callback: (req: (PairRequest & {id:string})[]) => void) {
+  const q = query(requests, where('target', '==', userId));
+  return onSnapshot(q, snap => {
+    const out: (PairRequest & {id:string})[] = [];
+    snap.forEach(d => out.push({ id: d.id, ...(d.data() as PairRequest) }));
+    callback(out);
+  });
+}
+
+export async function getPartnerId(pairId: string, userId: string) {
+  const snap = await getDoc(doc(pairings, pairId));
   if (!snap.exists()) return null;
   const data = snap.data() as Pairing;
-  if (data.creator === userId) return data.partner || null;
-  if (data.partner === userId) return data.creator;
-  return null;
+  const other = data.users.find(u => u !== userId);
+  return other || null;
 }
 
-export async function deletePairing(code: string) {
-  const ref = doc(pairings, code);
-  const snap = await getDoc(ref);
+export async function deletePairing(pairId: string) {
+  const snap = await getDoc(doc(pairings, pairId));
   if (!snap.exists()) return;
   const data = snap.data() as Pairing;
-  if (data.creator) await updatePair(data.creator, null);
-  if (data.partner) await updatePair(data.partner, null);
-  await deleteDoc(ref);
+  await Promise.all(data.users.map(uid => updatePair(uid, null)));
+  await deleteDoc(doc(pairings, pairId));
 }
 
-const pairCodeKey = 'pairCode';
-
-export function setPairCode(code: string) {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem(pairCodeKey, code);
-  }
+const pairKey = 'pairId';
+export function setPairCode(id: string) {
+  if (typeof window !== 'undefined') localStorage.setItem(pairKey, id);
 }
-
 export function clearPairCode() {
-  if (typeof window !== 'undefined') localStorage.removeItem(pairCodeKey);
+  if (typeof window !== 'undefined') localStorage.removeItem(pairKey);
 }
-
 export function getPairCode(): string | null {
-  return typeof window !== 'undefined' ? localStorage.getItem(pairCodeKey) : null;
+  return typeof window !== 'undefined' ? localStorage.getItem(pairKey) : null;
 }

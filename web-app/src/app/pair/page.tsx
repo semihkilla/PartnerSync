@@ -1,71 +1,58 @@
 'use client';
-
-import { useState } from 'react';
-import { createPairing, joinPairing, setPairCode, getPairForUser } from '../../lib/pair';
+import { useState, useEffect } from 'react';
+import { sendPairRequest } from '../../lib/pair';
+import { getUserProfile } from '../../lib/user';
 import { auth } from '../../lib/auth';
-
-function randomCode() {
-  return Math.random().toString(36).slice(2, 8);
-}
 
 export default function Pair() {
   const [code, setCode] = useState('');
-  const [error, setError] = useState('');
+  const [msg, setMsg] = useState('');
+  const [myCode, setMyCode] = useState<string | null>(null);
 
-  const user = auth.currentUser;
-
+  useEffect(() => {
+    async function fetchCode() {
+      if (!auth.currentUser) return;
+      const profile = await getUserProfile(auth.currentUser.uid);
+      setMyCode(profile?.pairCode || null);
+    }
+    fetchCode();
+  }, []);
   return (
     <div className="card flex flex-col gap-4">
-      <div>
-        <button
-          className="btn"
-          onClick={async () => {
-            if (!user) return;
-            const existing = await getPairForUser(user.uid);
-            if (existing) {
-              setError('Already paired');
-              return;
-            }
-            const c = randomCode();
-            setCode(c);
-            await createPairing(c, user.uid);
-            setPairCode(c);
-            setError('');
-          }}
-        >
-          Generate Code
-        </button>
-      </div>
-      <div className="flex gap-2">
-        <input
-          className="input flex-1"
-          placeholder="Enter code"
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-        />
-        <button
-          className="btn"
-          onClick={async () => {
-            if (!user) return;
-            const existing = await getPairForUser(user.uid);
-            if (existing) {
-              setError('Already paired');
-              return;
-            }
-            await joinPairing(code, user.uid);
-            setPairCode(code);
-            setError('');
-          }}
-        >
-          Join
-        </button>
-      </div>
-      {error && <p className="error">{error}</p>}
-      {code && !error && (
-        <a href="/chat" className="underline text-sm text-pink-700">
-          Go to Chat
-        </a>
+      {myCode && (
+        <div className="text-sm flex items-center gap-2">
+          <span>Your code: {myCode}</span>
+          <button
+            className="underline text-xs"
+            onClick={() => {
+              navigator.clipboard.writeText(myCode);
+              alert('Code kopiert!');
+            }}
+          >
+            Copy
+          </button>
+        </div>
       )}
+      <input
+        className="input"
+        placeholder="Partner code"
+        value={code}
+        onChange={(e) => setCode(e.target.value)}
+      />
+      <button
+        className="btn"
+        onClick={async () => {
+          try {
+            await sendPairRequest(code.trim());
+            setMsg('Request sent');
+          } catch (e) {
+            setMsg((e as Error).message);
+          }
+        }}
+      >
+        Pair
+      </button>
+      {msg && <p className="text-sm text-center">{msg}</p>}
     </div>
   );
 }

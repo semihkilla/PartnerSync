@@ -2,9 +2,12 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { auth, onAuthChange, logOut } from '../lib/auth';
+import NotificationDropdown from './NotificationDropdown';
+import { useRouter } from 'next/navigation';
 
 export default function Header() {
   const [user, setUser] = useState(auth.currentUser);
+  const router = useRouter();
 
   useEffect(() => onAuthChange((u) => setUser(u)), []);
 
@@ -27,11 +30,12 @@ export default function Header() {
             <Link href="/chat" className="hover:scale-105 transition-transform">
               💌 Chat
             </Link>
+            <NotificationDropdown />
             <Link href="/profile" className="hover:scale-105 transition-transform">
               ⚙️ Profile
             </Link>
             <button
-              onClick={() => logOut()}
+              onClick={async () => { await logOut(); router.push('/'); }}
               className="hover:scale-105 transition-transform"
             >
               🔓 Logout

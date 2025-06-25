@@ -1,8 +1,9 @@
 import { addDoc, collection, onSnapshot, orderBy, query, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { db } from './firebase';
 import { auth } from './auth';
-import { getPairCode } from './pair';
+import { getPairCode, getPartnerId } from './pair';
 import { getUserProfile } from './user';
+import { createNotification } from './notifications';
 
 export interface Message {
   id?: string;
@@ -18,12 +19,17 @@ export async function sendMessage(text: string) {
   const ref = collection(db, 'pairings', pair, 'messages');
   const sender = auth.currentUser?.uid || 'anonymous';
   const profile = auth.currentUser ? await getUserProfile(auth.currentUser.uid) : null;
-  return addDoc(ref, {
+  const docRef = await addDoc(ref, {
     text,
     sender,
     senderName: profile?.username || 'anonymous',
     createdAt: serverTimestamp(),
   });
+  const partner = auth.currentUser ? await getPartnerId(pair, auth.currentUser.uid) : null;
+  if (partner) {
+    await createNotification({ userId: partner, type: 'chatMessage', from: sender });
+  }
+  return docRef;
 }
 
 export function subscribeToMessages(callback: (messages: Message[]) => void) {
