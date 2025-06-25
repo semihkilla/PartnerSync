@@ -94,7 +94,7 @@ export default function Chat() {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: mine ? 50 : -50 }}
                     transition={{ duration: 0.3 }}
-                    className={`flex ${mine ? 'justify-end' : 'justify-start'} w-full`}
+                    style={{ display: 'flex', justifyContent: mine ? 'flex-end' : 'flex-start', width: '100%' }}
                   >
                     <div className={`px-4 py-2 rounded-2xl shadow max-w-xs break-words ${mine ? 'bg-gradient-to-br from-pink-400 to-pink-500 text-white rounded-br-3xl' : 'bg-white dark:bg-gray-700 text-black dark:text-white rounded-bl-3xl'}`}>
                       <div className="flex items-center gap-2 mb-1">
@@ -124,11 +124,19 @@ export default function Chat() {
       </div>
       <div className="mt-2 flex items-center gap-3 text-sm">
         <label htmlFor="chat-bg-picker" className="font-semibold">Background:</label>
-        <div
+        <button
+          type="button"
           className="w-7 h-7 rounded-full border-2 border-pink-400 shadow-lg transition-transform transform hover:scale-110 cursor-pointer"
           style={{ background: bg }}
           title="Current background"
+          aria-label="Pick chat background color"
           onClick={() => document.getElementById('chat-bg-picker')?.click()}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              document.getElementById('chat-bg-picker')?.click();
+            }
+          }}
         />
         <input
           id="chat-bg-picker"

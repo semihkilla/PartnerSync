@@ -1,4 +1,4 @@
 .DS_Store
 firebase/*.secret
-!web-app/.env.local
+web-app/.env.local
 web-app/.env*
