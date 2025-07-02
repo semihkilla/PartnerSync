@@ -5,7 +5,6 @@ import {
   acceptPairRequest,
   declinePairRequest,
   subscribeToRequests,
-  setPairCode,
   PairRequest,
 } from "../lib/pair";
 import {
