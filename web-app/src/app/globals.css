@@ -1,31 +1,50 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+.bg-card-bg {
+  background: rgba(35,35,52,0.97);
+}
+
+:root {
+  --primary-pink: #f46abb;
+}
+.text-primary-pink { color: var(--primary-pink); }
+.ring-primary-pink { --tw-ring-color: var(--primary-pink); }
+.shadow-glow { box-shadow: 0 0 12px 2px #f46abb77; }
+.shadow-menu { box-shadow: 0 4px 24px 0 #ff89d6aa; }
 
 body {
-  @apply bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-white font-sans;
+  font-family: var(--font-geist-sans, sans-serif);
+  color: #27272a;
+  background: linear-gradient(135deg, #ee3ca0 0%, #f46abb 60%, #232334 100%);
+  min-height: 100vh;
 }
 
 @layer components {
   .btn {
-    @apply bg-pink-500 text-white font-semibold px-4 py-2 rounded-xl shadow hover:bg-pink-600 transition-colors;
+    @apply bg-primary-pink text-white font-semibold px-4 py-2 rounded-xl shadow hover:bg-secondary-pink transition-colors;
   }
   .input {
-    @apply rounded-xl px-4 py-2 bg-pink-100 dark:bg-pink-900/30 text-black dark:text-white shadow focus:outline-none focus:ring-2 focus:ring-pink-400;
-    &::placeholder { @apply text-gray-400; }
+    @apply rounded-xl px-4 py-2 bg-pink-100 dark:bg-pink-900/30 text-black dark:text-white shadow focus:outline-none focus:ring-2 focus:ring-primary-pink;
+    &::placeholder { @apply text-zinc-400; }
   }
   .card {
-    @apply bg-gray-200/90 dark:bg-gray-800/90 backdrop-blur-sm p-8 rounded-2xl shadow-xl max-w-md w-full;
+    @apply bg-white/90 dark:bg-card-bg backdrop-blur-sm p-8 rounded-2xl shadow-xl max-w-md w-full;
   }
   .fab {
-    @apply fixed bottom-6 right-6 w-16 h-16 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 shadow-xl flex items-center justify-center text-3xl text-white border-4 border-white/30 hover:scale-105 transition-transform;
+    @apply fixed bottom-6 right-6 w-16 h-16 rounded-full bg-gradient-to-br from-primary-pink to-secondary-pink shadow-xl flex items-center justify-center text-3xl text-white border-4 border-white/30 hover:scale-105 transition-transform;
   }
   .error {
     @apply text-red-600 text-sm;
   }
-  @keyframes fade-in-up {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
   .animate-fade-in-up {
     animation: fade-in-up 0.25s both;
   }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(16px);}
+  to { opacity: 1; transform: translateY(0);}
 }
