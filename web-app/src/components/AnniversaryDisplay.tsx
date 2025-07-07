@@ -21,7 +21,7 @@ export default function AnniversaryDisplay({ date }: { date: string }) {
   }, []);
   const s = getStats(date);
   return (
-    <div>
+    <div className="bg-primary-pink text-white rounded-xl px-4 py-2 shadow-glow mt-2 text-center">
       Together since: {s.years > 0 && `${s.years} year${s.years > 1 ? 's' : ''}, `}
       {s.days} days (total {s.totalDays} days)
       <br />({s.hours}h {s.minutes}m)

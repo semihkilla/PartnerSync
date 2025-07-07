@@ -1,50 +1,83 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-
-.bg-card-bg {
-  background: rgba(35,35,52,0.97);
-}
-
-:root {
-  --primary-pink: #f46abb;
-}
-.text-primary-pink { color: var(--primary-pink); }
-.ring-primary-pink { --tw-ring-color: var(--primary-pink); }
-.shadow-glow { box-shadow: 0 0 12px 2px #f46abb77; }
-.shadow-menu { box-shadow: 0 4px 24px 0 #ff89d6aa; }
+@import "tailwindcss";
 
 body {
-  font-family: var(--font-geist-sans, sans-serif);
-  color: #27272a;
-  background: linear-gradient(135deg, #ee3ca0 0%, #f46abb 60%, #232334 100%);
-  min-height: 100vh;
+  @apply bg-white dark:bg-gray-900 text-gray-800 dark:text-white font-sans;
 }
 
 @layer components {
-  .btn {
-    @apply bg-primary-pink text-white font-semibold px-4 py-2 rounded-xl shadow hover:bg-secondary-pink transition-colors;
+  .card {
+    @apply bg-white dark:bg-gray-800/95 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 px-6 py-8;
+    @apply transition-all duration-200;
+    @apply w-full max-w-md mx-auto;
   }
   .input {
-    @apply rounded-xl px-4 py-2 bg-pink-100 dark:bg-pink-900/30 text-black dark:text-white shadow focus:outline-none focus:ring-2 focus:ring-primary-pink;
-    &::placeholder { @apply text-zinc-400; }
+    @apply w-full mt-1 px-4 py-2 bg-white/90 dark:bg-gray-900/80 rounded-lg border border-gray-300 dark:border-gray-700 text-base focus:outline-none focus:ring-2 focus:ring-pink-400 transition;
   }
-  .card {
-    @apply bg-white/90 dark:bg-card-bg backdrop-blur-sm p-8 rounded-2xl shadow-xl max-w-md w-full;
+  .btn {
+    @apply bg-pink-500 hover:bg-pink-600 text-white font-semibold py-2 rounded-xl shadow-lg mt-1 transition active:scale-95;
+    @apply w-full text-center;
   }
-  .fab {
-    @apply fixed bottom-6 right-6 w-16 h-16 rounded-full bg-gradient-to-br from-primary-pink to-secondary-pink shadow-xl flex items-center justify-center text-3xl text-white border-4 border-white/30 hover:scale-105 transition-transform;
+  .btn-google {
+    @apply flex items-center gap-3 justify-center py-2 px-2 mt-1 w-full border border-gray-300 dark:border-gray-700 bg-white hover:bg-gray-50 text-black font-semibold rounded-xl shadow;
+    transition: box-shadow 0.15s;
   }
   .error {
-    @apply text-red-600 text-sm;
+    @apply text-center text-red-500 text-sm mt-2;
   }
-  .animate-fade-in-up {
-    animation: fade-in-up 0.25s both;
+  .success {
+    @apply text-center text-green-500 text-sm mt-2;
   }
-}
-
-@keyframes fade-in-up {
-  from { opacity: 0; transform: translateY(16px);}
-  to { opacity: 1; transform: translateY(0);}
+  .username-check {
+    @apply text-xs mt-1 ml-1 font-semibold;
+  }
+  
+  .btn {
+    @apply bg-pink-500 text-white font-semibold px-4 py-2 rounded-xl shadow-md
+      hover:bg-pink-600 hover:shadow-xl transition-colors
+      active:scale-95 focus:outline-none focus:ring-4 focus:ring-pink-300;
+    box-shadow: 0 2px 16px 0 #f472b633, 0 1.5px 6px 0 #f472b688;
+    transition: box-shadow 0.18s, transform 0.16s;
+    will-change: transform;
+  }
+  .header-nav-btn {
+    @apply flex items-center gap-1 px-5 py-2 rounded-xl font-bold bg-gradient-to-br from-pink-400 to-pink-600 shadow-md text-white
+      hover:from-pink-500 hover:to-pink-700
+      active:scale-95 focus:outline-none focus:ring-4 focus:ring-pink-300/30;
+    box-shadow: 0 3px 18px 0 #f472b650, 0 1.5px 6px 0 #f472b688;
+    transition: box-shadow 0.2s, transform 0.16s, background 0.14s;
+    will-change: transform;
+  }
+  .header-nav-btn:active { transform: scale(0.97); }
+  .profile-dropdown {
+    @apply absolute right-0 mt-3 w-64 rounded-lg shadow-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 z-50;
+  }
+  .dropdown-item {
+    @apply block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-white transition;
+    font-size: 15px;
+  }
+  /* Header Gradient Varianten */
+  .header-gradient-pinkblue {
+    @apply sticky top-0 z-30 shadow-sm;
+    background: linear-gradient(90deg, #f472b6 0%, #4f46e5 100%);
+    border-bottom: 2.5px solid #ece8fa;
+  }
+  .header-gradient-pink {
+    @apply sticky top-0 z-30 shadow-sm;
+    background: linear-gradient(90deg, #fa4792 0%, #febfe3 100%);
+    border-bottom: 2.5px solid #ffe4f3;
+  }
+  .header-gradient-blue {
+    @apply sticky top-0 z-30 shadow-sm;
+    background: linear-gradient(90deg, #1e3a8a 0%, #93c5fd 100%);
+    border-bottom: 2.5px solid #e3eaff;
+  }
+  /* Farbkreis-Vorschau */
+  .theme-circle {
+    @apply w-7 h-7 inline-block rounded-full border-2 shadow cursor-pointer mr-1;
+    vertical-align: middle;
+  }
+  .theme-pinkblue-preview { background: linear-gradient(90deg, #f472b6 0%, #4f46e5 100%);}
+  .theme-pink-preview { background: linear-gradient(90deg, #fa4792 0%, #febfe3 100%);}
+  .theme-blue-preview { background: linear-gradient(90deg, #1e3a8a 0%, #93c5fd 100%);}
+  
 }

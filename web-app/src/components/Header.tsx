@@ -1,71 +1,215 @@
 "use client";
 import Link from "next/link";
-import { useState, useEffect, Fragment } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { auth, onAuthChange, logOut } from "../lib/auth";
+import {
+  watchUserProfile,
+  UserProfile,
+} from "../lib/user";
 import NotificationDropdown from "./NotificationDropdown";
-import { useRouter } from "next/navigation";
-import { UserCircle, LogOut, Heart, MessageCircle, Users, ChevronDown } from "lucide-react";
+import { Users, MessageCircle } from "lucide-react";
+
+/* -------------------------------------------------------------------------- */
+
+const THEME_OPTIONS = [
+  { key: "header-gradient-pinkblue", name: "Pink ↔ Blau", preview: "theme-pinkblue-preview" },
+  { key: "header-gradient-pink",     name: "Pink",        preview: "theme-pink-preview" },
+  { key: "header-gradient-blue",     name: "Blau",        preview: "theme-blue-preview" },
+];
+
+function getInitials(p?: UserProfile | null) {
+  if (!p) return "";
+  const first = p.firstName?.trim()[0] ?? "";
+  const last  = p.lastName?.trim()[0]  ?? "";
+  if (first && last) return (first + last).toUpperCase();
+  return p.username?.slice(0, 2).toUpperCase() ?? "";
+}
+
+/* -------------------------------------------------------------------------- */
 
 export default function Header() {
-  const [user, setUser] = useState(auth.currentUser);
-  const [dropdown, setDropdown] = useState(false);
-  const router = useRouter();
+  const [user,    setUser]    = useState(auth.currentUser);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [theme,   setTheme]   = useState("header-gradient-pinkblue");
+  const [open,    setOpen]    = useState(false);
 
-  useEffect(() => onAuthChange(setUser), []);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const router      = useRouter();
+  const pathname    = usePathname();
+
+  /* ---------- Theme ------------------------------------------------------------------ */
+  useEffect(() => {
+    const t = localStorage.getItem("louvibe-theme");
+    if (t && THEME_OPTIONS.some((o) => o.key === t)) setTheme(t);
+  }, []);
+  useEffect(() => localStorage.setItem("louvibe-theme", theme), [theme]);
+
+  /* ---------- Auth + Realtime Profile ------------------------------------------------- */
+  useEffect(() => {
+    setLoading(true);
+
+    const unsubAuth = onAuthChange((u) => {
+      setUser(u);
+
+      if (!u) {
+        setProfile(null);
+        setLoading(false);
+        return;
+      }
+
+      const unsubProfile = watchUserProfile(u.uid, (p) => {
+        setProfile(p);
+        setLoading(false);
+      });
+
+      return () => {
+        unsubProfile();
+      };
+    });
+
+    return () => {
+      unsubAuth();
+    };
+  }, []);
+
+  /* ---------- Klick-Outside ----------------------------------------------------------- */
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    if (open) document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
+  /* ---------- Lade-Skeleton ----------------------------------------------------------- */
+  if (loading) {
+    return (
+      <nav className={theme}>
+        <div className="max-w-5xl mx-auto flex items-center justify-between px-4 py-2">
+          <div className="animate-pulse w-32 h-9 bg-gray-200 rounded" />
+          <div className="animate-pulse w-10 h-10 bg-gray-200 rounded-full" />
+        </div>
+      </nav>
+    );
+  }
+
+  // Neu: unterscheiden, ob profile.photoURL je gesetzt war
+  const avatarUrl =
+    profile && profile.photoURL !== undefined
+      ? profile.photoURL  // kann auch "", dann wird kein <img> gerendert
+      : user?.photoURL || "";
+
+  const minimal = pathname === "/signup" || pathname === "/complete-signup";
 
   return (
-    <header className="fixed top-0 left-0 w-full bg-gradient-to-r from-primary-pink to-secondary-pink text-white px-8 py-4 flex justify-between items-center shadow-glow z-50">
-      <Link href="/" className="flex items-center gap-2 font-extrabold text-2xl tracking-tight hover:scale-105 transition-transform">
-        <Heart className="w-7 h-7 -mt-1" /> PartnerSync
-      </Link>
-      <nav className="flex gap-8 items-center text-lg font-semibold">
-        {user && (
-          <>
-            <Link href="/pair" className="flex items-center gap-1 hover:opacity-90 transition-opacity">
+    <nav className={theme}>
+      <div className="max-w-5xl mx-auto flex items-center justify-between px-4 py-2">
+        {/* Logo ------------------------------------------------------------------ */}
+        <Link href="/" className="flex items-center gap-3 select-none">
+          <img src="/LouVibeLogo.png" className="h-9 rounded" alt="Logo" />
+          <span className="text-2xl font-bold tracking-tight text-white">
+            PartnerSync
+          </span>
+        </Link>
+
+        {/* Rechts ---------------------------------------------------------------- */}
+        {minimal ? (
+          <Link href="/login" className="header-nav-btn">
+            Login
+          </Link>
+        ) : user ? (
+          <div className="flex items-center gap-3">
+            <Link href="/pair" className="header-nav-btn flex items-center gap-2">
               <Users className="w-5 h-5" /> Pair
             </Link>
-            <Link href="/chat" className="flex items-center gap-1 hover:opacity-90 transition-opacity">
+            <Link href="/chat" className="header-nav-btn flex items-center gap-2">
               <MessageCircle className="w-5 h-5" /> Chat
             </Link>
+
             <NotificationDropdown />
-            <div className="relative">
+
+            {/* Avatar ----------------------------------------------------------- */}
+            <div ref={dropdownRef} className="relative">
               <button
-                className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full font-semibold hover:bg-white/20 transition-colors shadow"
-                onClick={() => setDropdown((v) => !v)}
-                aria-label="Profile menu"
+                onClick={() => setOpen((o) => !o)}
+                className="ml-1 w-12 h-12 rounded-full border-2 border-blue-100 hover:border-blue-300 shadow"
+                aria-label="Profil-Menü"
               >
-                <span className="bg-white/20 rounded-full w-8 h-8 flex items-center justify-center font-bold">
-                  <UserCircle className="w-6 h-6" />
-                </span>
-                Profile
-                <ChevronDown className={`w-4 h-4 transition-transform ${dropdown ? "rotate-180" : ""}`} />
+                {avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    className="w-full h-full rounded-full object-cover"
+                    alt="Avatar"
+                  />
+                ) : (
+                  <span className="w-full h-full flex items-center justify-center rounded-full bg-pink-400 text-xl font-bold text-white">
+                    {getInitials(profile)}
+                  </span>
+                )}
               </button>
-              {dropdown && (
-                <div className="absolute right-0 mt-3 bg-card-bg/90 text-white rounded-2xl shadow-menu w-44 animate-fade-in-up z-50 border border-primary-pink/30 overflow-hidden">
-                  <Link
-                    href="/profile"
-                    className="flex items-center gap-3 px-5 py-3 hover:bg-primary-pink/60 transition-colors"
-                    onClick={() => setDropdown(false)}
-                  >
-                    <UserCircle className="w-5 h-5" /> Profile
-                  </Link>
-                  <button
-                    onClick={async () => { await logOut(); setDropdown(false); router.push("/"); }}
-                    className="flex w-full items-center gap-3 px-5 py-3 hover:bg-red-500/70 text-left transition-colors"
-                  >
-                    <LogOut className="w-5 h-5" /> Logout
-                  </button>
+
+              {open && (
+                <div className="profile-dropdown">
+                  <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
+                    <p className="font-semibold">
+                      {profile?.firstName} {profile?.lastName}
+                    </p>
+                    <p className="text-xs text-gray-500 truncate">
+                      {profile?.email}
+                    </p>
+                  </div>
+
+                  <ul className="py-2">
+                    <li>
+                      <Link href="/profile" className="dropdown-item">
+                        Profil
+                      </Link>
+                    </li>
+                    <li>
+                      <button
+                        className="dropdown-item"
+                        onClick={async () => {
+                          await logOut();
+                          setOpen(false);
+                          router.push("/");
+                        }}
+                      >
+                        Logout
+                      </button>
+                    </li>
+
+                    <li className="px-4 pt-2 pb-1 text-sm font-semibold text-gray-600 dark:text-gray-300">
+                      Header-Theme
+                    </li>
+                    <li className="px-4 pb-3 flex gap-2">
+                      {THEME_OPTIONS.map((opt) => (
+                        <button
+                          key={opt.key}
+                          title={opt.name}
+                          onClick={() => setTheme(opt.key)}
+                          className={`theme-circle ${opt.preview} ${
+                            theme === opt.key
+                              ? "ring-2 ring-blue-500 scale-110"
+                              : "border-gray-200 hover:ring-2 hover:ring-blue-400"
+                          }`}
+                        />
+                      ))}
+                    </li>
+                  </ul>
                 </div>
               )}
             </div>
-          </>
-        )}
-        {!user && (
-          <Link href="/login" className="hover:opacity-90 transition-opacity">
-            <LogOut className="w-5 h-5" /> Login
+          </div>
+        ) : (
+          <Link href="/login" className="header-nav-btn">
+            Login
           </Link>
         )}
-      </nav>
-    </header>
+      </div>
+    </nav>
   );
 }

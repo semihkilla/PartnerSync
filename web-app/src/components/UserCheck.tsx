@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { auth } from "../lib/auth";
-import { getUserProfile, createUserProfile } from "../lib/user";
+import { getUserProfile } from "../lib/user";
 
 export default function UserCheck({ children }: { children: React.ReactNode }) {
   const router = useRouter();
