@@ -53,7 +53,7 @@ export default function CompleteSignup() {
         ...f,
         firstName  : p?.firstName  || "",
         lastName   : p?.lastName   || "",
-        gender     : (p as any)?.gender ?? "",
+        gender     : p?.gender ?? "",
         birthday   : p?.birthday   ? new Date(p.birthday)   : null,
         anniversary: p?.anniversary? new Date(p.anniversary): null,
       }));
@@ -118,8 +118,8 @@ export default function CompleteSignup() {
 
       alert("Profil vervollständigt! Dein Code: " + profile.pairCode);
       router.replace("/");
-    } catch (e: any) {
-      setError(e.message ?? "Speichern fehlgeschlagen");
+    } catch (e: unknown) {
+      setError((e as Error).message ?? "Speichern fehlgeschlagen");
     } finally {
       setSubmitting(false);
     }
