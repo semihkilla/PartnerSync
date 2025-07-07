@@ -49,9 +49,15 @@ export default function Header() {
   /* ---------- Auth + Realtime Profile ------------------------------------------------- */
   useEffect(() => {
     setLoading(true);
+    let unsubProfile: (() => void) | null = null;
 
     const unsubAuth = onAuthChange((u) => {
       setUser(u);
+
+      if (unsubProfile) {
+        unsubProfile();
+        unsubProfile = null;
+      }
 
       if (!u) {
         setProfile(null);
@@ -59,17 +65,14 @@ export default function Header() {
         return;
       }
 
-      const unsubProfile = watchUserProfile(u.uid, (p) => {
+      unsubProfile = watchUserProfile(u.uid, (p) => {
         setProfile(p);
         setLoading(false);
       });
-
-      return () => {
-        unsubProfile();
-      };
     });
 
     return () => {
+      unsubProfile?.();
       unsubAuth();
     };
   }, []);

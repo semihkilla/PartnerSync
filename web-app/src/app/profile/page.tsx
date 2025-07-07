@@ -109,14 +109,21 @@ export default function Profile() {
 
   // 1) Auth-Listener + Firestore-Realtime-Abo
   useEffect(() => {
+    let unsubProf: (() => void) | null = null;
     const unsubAuth = onAuthChange(user => {
       setAuthLoading(false);
+      if (unsubProf) {
+        unsubProf();
+        unsubProf = null;
+      }
       if (!user) {
         router.replace("/login");
+        setProfile(null);
+        setDraft(null);
         return;
       }
       // Profil als Snapshot abonnieren
-      const unsubProf = watchUserProfile(user.uid, async p => {
+      unsubProf = watchUserProfile(user.uid, async p => {
         setProfile(p);
         setDraft(p ? { ...p } : null); // Kopie als Draft!
         setProfileLoading(false);
@@ -138,16 +145,19 @@ export default function Profile() {
           setPartnerName(null);
         }
       });
-      return unsubProf;
     });
-    return () => unsubAuth();
+    return () => {
+      unsubProf?.();
+      unsubAuth();
+    };
   }, [router]);
 
   // Draft zurücksetzen (z.B. bei Abbrechen oder nach Speichern)
-  const resetDraft = () => {
-    setDraft(profile ? { ...profile } : null);
-    setBirthday(profile?.birthday ? new Date(profile.birthday) : null);
-    setAnniversary(profile?.anniversary ? new Date(profile.anniversary) : null);
+  const resetDraft = (p?: UserProfile | null) => {
+    const base = p ?? profile;
+    setDraft(base ? { ...base } : null);
+    setBirthday(base?.birthday ? new Date(base.birthday) : null);
+    setAnniversary(base?.anniversary ? new Date(base.anniversary) : null);
     setAvatarFile(null);
     setAvatarPreview(null);
     setAvatarToDelete(false);
@@ -209,15 +219,15 @@ export default function Profile() {
       if (!(await isUsernameAvailableExceptSelf(draft.username.trim(), auth.currentUser.uid)))
         throw new Error("Username ist bereits vergeben");
 
-      let photoURL = draft.photoURL || "";
+      const oldUrl  = profile?.photoURL || "";
+      let photoURL  = draft.photoURL || "";
 
       // neues Bild?
       if (avatarFile) {
-        photoURL = await updateProfileImage(avatarFile, auth.currentUser.uid, draft.photoURL) || "";
-      }
-      // markiert zum Löschen?
-      if (avatarToDelete && photoURL && photoURL !== DEFAULT_AVATAR) {
-        await deleteProfileImage(photoURL);
+        photoURL =
+          (await updateProfileImage(avatarFile, auth.currentUser.uid, oldUrl)) || "";
+      } else if (avatarToDelete && oldUrl && oldUrl !== DEFAULT_AVATAR) {
+        await deleteProfileImage(oldUrl);
         photoURL = "";
       }
 
@@ -236,11 +246,19 @@ export default function Profile() {
         anniversary: anniversary ? anniversary.toISOString().slice(0,10) : undefined,
       });
 
+      const updated: UserProfile = {
+        ...draft,
+        username: draft.username.trim(),
+        photoURL,
+        ...(birthday && { birthday: birthday.toISOString().slice(0, 10) }),
+        ...(anniversary && { anniversary: anniversary.toISOString().slice(0, 10) }),
+      };
+      setProfile(updated);
+      resetDraft(updated);
       setEditing(false);
-      resetDraft();
       alert("Profil gespeichert!");
-    } catch (e: any) {
-      setError(e.message||"Fehler beim Speichern");
+    } catch (e: unknown) {
+      setError((e as Error).message || "Fehler beim Speichern");
     } finally {
       setSubmitting(false);
     }

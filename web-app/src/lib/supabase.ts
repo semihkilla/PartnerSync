@@ -23,7 +23,11 @@ export async function updateProfileImage(
 
   const { error } = await supabase
     .storage.from("profile-photos")
-    .upload(filePath, file, { cacheControl: "3600", upsert: true });
+    .upload(filePath, file, {
+      cacheControl: "3600",
+      upsert: true,
+      contentType: file.type || undefined,
+    });
 
   if (error) {
     console.error("Upload error:", error);

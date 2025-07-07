@@ -119,8 +119,8 @@ export default function SignUp() {
 
       alert("Erfolgreich registriert. Dein Code: " + profile.pairCode);
       router.replace("/");
-    } catch (e: any) {
-      setError(e.message ?? "Registrierung fehlgeschlagen");
+    } catch (e: unknown) {
+      setError((e as Error).message ?? "Registrierung fehlgeschlagen");
     } finally {
       setSubmitting(false);
     }
@@ -137,8 +137,8 @@ export default function SignUp() {
         return router.replace("/");
       }
       router.replace("/complete-signup");
-    } catch (e: any) {
-      setError(e.message ?? "Google-Login fehlgeschlagen");
+    } catch (e: unknown) {
+      setError((e as Error).message ?? "Google-Login fehlgeschlagen");
     } finally {
       setSubmitting(false);
     }
