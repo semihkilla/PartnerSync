@@ -1,5 +1,5 @@
-"use client";
-import { useState, useEffect } from "react";
+'use client';
+import { useState, useEffect, useRef } from "react";
 import { auth } from "../lib/auth";
 import {
   acceptPairRequest,
@@ -14,13 +14,13 @@ import {
   deleteNotification,
 } from "../lib/notifications";
 import { getUserProfile } from "../lib/user";
-import { Bell } from "lucide-react";
 
 export default function NotificationDropdown() {
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationDoc[]>([]);
   const [requests, setRequests] = useState<(PairRequest & { id: string })[]>([]);
   const [usernames, setUsernames] = useState<Record<string, string>>({});
+  const dropRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const u = auth.currentUser;
@@ -46,113 +46,88 @@ export default function NotificationDropdown() {
     fetchNames();
   }, [requests, usernames]);
 
+  // Outside click schließen
+  useEffect(() => {
+    function close(e: MouseEvent) {
+      if (dropRef.current && !dropRef.current.contains(e.target as Node)) setOpen(false);
+    }
+    if (open) document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, [open]);
+
   const unread = notifications.filter((n) => !n.read).length + requests.length;
 
   const renderNotification = (n: NotificationDoc) => {
     switch (n.type) {
-      case "pairAccepted":
-        return "Pair request accepted";
-      case "pairDeclined":
-        return "Pair request declined";
-      case "chatMessage":
-        return "New message";
-      case "heartRain":
-        return "💖 Partner sent you Heart Rain!";
-      case "flowerRain":
-        return "🌸 Partner sent you Flower Rain!";
-      default:
-        return n.type;
+      case "pairAccepted": return "Pair-Anfrage akzeptiert";
+      case "pairDeclined": return "Pair-Anfrage abgelehnt";
+      case "chatMessage": return "Neue Nachricht";
+      case "heartRain": return "Heart Rain!";
+      case "flowerRain": return "Flower Rain!";
+      default: return n.type;
     }
-  };
-
-  // Special: Heart/Flower rain notification → "accept" to show animation
-  const showRain = (type: "heartRain" | "flowerRain") => {
-    // Add DOM animation to body
-    const emj = type === "heartRain" ? "💖" : "🌸";
-    const container = document.createElement("div");
-    container.style.position = "fixed";
-    container.style.pointerEvents = "none";
-    container.style.left = "0";
-    container.style.top = "0";
-    container.style.width = "100vw";
-    container.style.height = "100vh";
-    container.style.zIndex = "99999";
-    document.body.appendChild(container);
-
-    const interval = setInterval(() => {
-      const el = document.createElement("div");
-      el.textContent = emj;
-      el.style.position = "absolute";
-      el.style.left = Math.random() * window.innerWidth + "px";
-      el.style.fontSize = Math.random() * 40 + 32 + "px";
-      el.style.opacity = Math.random() * 0.7 + 0.3 + "";
-      el.style.top = "-32px";
-      el.style.transition = "top 2s linear, opacity 2s";
-      container.appendChild(el);
-      setTimeout(() => {
-        el.style.top = window.innerHeight + "px";
-        el.style.opacity = "0";
-      }, 20);
-      setTimeout(() => el.remove(), 2100);
-    }, 70);
-
-    setTimeout(() => {
-      clearInterval(interval);
-      container.remove();
-    }, 2200);
   };
 
   return (
     <div className="relative">
-      <button onClick={() => setOpen((o) => !o)} className="relative p-2">
-        <Bell className="w-6 h-6" />
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="relative inline-flex items-center justify-center w-10 h-10 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white focus:outline-none"
+        aria-label="Benachrichtigungen"
+      >
+        {/* Bell Icon */}
+        <svg className="w-6 h-6" fill="violet" viewBox="0 0 14 20">
+          <path d="M12.133 10.632v-1.8A5.406 5.406 0 0 0 7.979 3.57.946.946 0 0 0 8 3.464V1.1a1 1 0 0 0-2 0v2.364a.946.946 0 0 0 .021.106 5.406 5.406 0 0 0-4.154 5.262v1.8C1.867 13.018 0 13.614 0 14.807 0 15.4 0 16 .538 16h12.924C14 16 14 15.4 14 14.807c0-1.193-1.867-1.789-1.867-4.175ZM3.823 17a3.453 3.453 0 0 0 6.354 0H3.823Z" />
+        </svg>
         {unread > 0 && (
-          <span className="absolute -top-1 -right-1 bg-primary-pink text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse border-2 border-white">
-            {unread}
-          </span>
+          <div className="absolute top-0 right-0 block w-3.5 h-3.5 bg-red-500 border-2 border-white rounded-full"></div>
         )}
       </button>
-      {open && (
-        <div className="absolute right-0 mt-2 w-80 bg-card-bg/95 rounded-2xl shadow-menu p-3 space-y-3 z-50 border border-primary-pink/40 animate-fade-in-up">
+      {/* Dropdown */}
+      <div
+        ref={dropRef}
+        className={`absolute right-0 mt-3 z-50 w-[360px] bg-white divide-y divide-gray-100 rounded-lg shadow-sm dark:bg-gray-800 dark:divide-gray-700 transition ${
+          open ? 'block' : 'hidden'
+        }`}
+      >
+        <div className="block px-4 py-2 font-semibold text-center text-gray-700 rounded-t-lg bg-gray-50 dark:bg-gray-800 dark:text-white">
+          Benachrichtigungen
+        </div>
+        <div className="max-h-96 overflow-y-auto">
           {requests.map((r) => (
-            <div key={r.id} className="text-sm flex items-center gap-2 bg-white/10 rounded-xl px-3 py-2">
-              <span className="flex-1">Pair request from <span className="font-bold text-primary-pink">{usernames[r.requester] ?? r.requester}</span></span>
-              <button className="btn px-3 py-1 text-xs" onClick={() => acceptPairRequest(r.id, r.requester)}>Accept</button>
-              <button className="btn px-3 py-1 text-xs bg-gray-500 hover:bg-gray-700" onClick={() => declinePairRequest(r.id, r.requester)}>Decline</button>
+            <div key={r.id} className="flex items-center gap-2 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700">
+              <div className="w-9 h-9 flex items-center justify-center bg-blue-200 rounded-full text-blue-700 font-bold">{(usernames[r.requester] ?? r.requester).substring(0, 2).toUpperCase()}</div>
+              <span className="flex-1 text-gray-800 dark:text-gray-200 text-sm">
+                Paaranfrage von <span className="font-bold">{usernames[r.requester] ?? r.requester}</span>
+              </span>
+              <button
+                className="ml-1 px-3 py-1 rounded-lg text-xs font-bold bg-blue-600 text-white shadow hover:bg-blue-700"
+                onClick={() => acceptPairRequest(r.id, r.requester)}
+              >Annehmen</button>
+              <button
+                className="ml-1 px-3 py-1 rounded-lg text-xs font-bold bg-gray-100 text-blue-700 hover:bg-gray-200"
+                onClick={() => declinePairRequest(r.id, r.requester)}
+              >Ablehnen</button>
             </div>
           ))}
           {notifications.map((n) => (
-            <div key={n.id} className="text-sm flex justify-between items-center bg-white/10 rounded-xl px-3 py-2">
-              <span>{renderNotification(n)}</span>
-              <div className="flex gap-1">
-                {["heartRain", "flowerRain"].includes(n.type) && (
-                  <button
-                    className="btn px-3 py-1 text-xs"
-                    onClick={() => {
-                      markNotificationRead(n.id!);
-                      showRain(n.type as "heartRain" | "flowerRain");
-                    }}
-                  >
-                    Show
+            <div key={n.id} className="flex justify-between items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700">
+              <span className="text-gray-700 dark:text-gray-200 text-sm">{renderNotification(n)}</span>
+              <div className="flex gap-2">
+                {!n.read && (
+                  <button className="text-xs text-blue-600 underline" onClick={() => markNotificationRead(n.id!)}>
+                    Gelesen
                   </button>
                 )}
-                {!n.read && !["heartRain", "flowerRain"].includes(n.type) && (
-                  <button
-                    className="underline text-xs"
-                    onClick={() => markNotificationRead(n.id!)}
-                  >
-                    Mark as read
-                  </button>
-                )}
-                <button className="underline text-xs text-red-600" onClick={() => n.id && deleteNotification(n.id!)}>
-                  ✕
-                </button>
+                <button className="text-xs text-red-500" onClick={() => n.id && deleteNotification(n.id!)}>✕</button>
               </div>
             </div>
           ))}
-          {requests.length === 0 && notifications.length === 0 && <p className="text-center text-sm text-gray-400">No notifications</p>}
+          {requests.length === 0 && notifications.length === 0 && (
+            <p className="text-center text-sm text-gray-400 py-4">Keine Benachrichtigungen</p>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
